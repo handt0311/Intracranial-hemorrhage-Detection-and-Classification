@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.metrics import roc_auc_score
+from tqdm.auto import tqdm
 
 from config import Config
 from dataset import RSNADataset, build_train_val_dataframes, set_seed
@@ -32,11 +33,13 @@ def compute_multilabel_auc(y_true, y_prob, label_names):
     return mean_auc, auc_dict
 
 
-def train_one_epoch(model, loader, optimizer, criterion, device):
+def train_one_epoch(model, loader, optimizer, criterion, device, epoch, total_epochs):
     model.train()
     total_loss = 0.0
 
-    for batch in loader:
+    progress_bar = tqdm(loader, desc=f"Train Epoch {epoch+1}/{total_epochs}", leave=True)
+
+    for batch in progress_bar:
         images = batch["image"].to(device)
         targets = batch["target"].to(device)   # [B, 6]
 
@@ -48,18 +51,24 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
 
         total_loss += loss.item() * images.size(0)
 
+        progress_bar.set_postfix({
+            "batch_loss": f"{loss.item():.4f}"
+        })
+
     return total_loss / len(loader.dataset)
 
 
 @torch.no_grad()
-def validate(model, loader, criterion, device, label_names):
+def validate(model, loader, criterion, device, label_names, epoch, total_epochs):
     model.eval()
     total_loss = 0.0
 
     all_targets = []
     all_probs = []
 
-    for batch in loader:
+    progress_bar = tqdm(loader, desc=f"Val Epoch {epoch+1}/{total_epochs}", leave=True)
+
+    for batch in progress_bar:
         images = batch["image"].to(device)
         targets = batch["target"].to(device)
 
@@ -71,6 +80,10 @@ def validate(model, loader, criterion, device, label_names):
         total_loss += loss.item() * images.size(0)
         all_targets.append(targets.cpu().numpy())
         all_probs.append(probs.cpu().numpy())
+
+        progress_bar.set_postfix({
+            "batch_loss": f"{loss.item():.4f}"
+        })
 
     val_loss = total_loss / len(loader.dataset)
 
@@ -129,13 +142,16 @@ def main():
     best_auc = -1.0
 
     for epoch in range(config.EPOCHS):
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        train_loss = train_one_epoch(
+            model, train_loader, optimizer, criterion, device, epoch, config.EPOCHS
+        )
+
         val_loss, val_mean_auc, val_auc_dict = validate(
-            model, val_loader, criterion, device, config.LABEL_COLS
+            model, val_loader, criterion, device, config.LABEL_COLS, epoch, config.EPOCHS
         )
 
         print(
-            f"Epoch [{epoch+1}/{config.EPOCHS}] "
+            f"\nEpoch [{epoch+1}/{config.EPOCHS}] "
             f"train_loss={train_loss:.4f} "
             f"val_loss={val_loss:.4f} "
             f"val_mean_auc={val_mean_auc:.4f}"
