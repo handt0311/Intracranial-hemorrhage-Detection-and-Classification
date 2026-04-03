@@ -1,13 +1,16 @@
+
 import torch
 import torch.nn as nn
 import torchvision.models as models
 
 
 class RSNAClassifier(nn.Module):
-    def __init__(self, pretrained: bool = False):
+    def __init__(self, num_classes: int = 6, pretrained: bool = False):
         super().__init__()
 
-        self.backbone = models.resnet18(weights=None if not pretrained else models.ResNet18_Weights.DEFAULT)
+        self.backbone = models.resnet18(
+            weights=None if not pretrained else models.ResNet18_Weights.DEFAULT
+        )
 
         # Change first conv to accept 1-channel image
         self.backbone.conv1 = nn.Conv2d(
@@ -21,10 +24,10 @@ class RSNAClassifier(nn.Module):
             nn.Linear(in_features, 256),
             nn.ReLU(inplace=True),
             nn.Dropout(0.2),
-            nn.Linear(256, 1)
+            nn.Linear(256, num_classes)
         )
 
     def forward(self, x):
         feat = self.backbone(x)
-        logits = self.classifier(feat).squeeze(1)
+        logits = self.classifier(feat)   # [B, 6]
         return logits

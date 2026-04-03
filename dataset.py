@@ -1,5 +1,5 @@
+
 import os
-import ast
 import numpy as np
 import pandas as pd
 import pydicom
@@ -32,12 +32,12 @@ def dicom_to_hu(dcm: pydicom.dataset.FileDataset) -> np.ndarray:
     return image
 
 
-def build_binary_labels(csv_path: str, positive_class: str = "any") -> pd.DataFrame:
+def build_multilabel_df(csv_path: str) -> pd.DataFrame:
     """
-    Convert RSNA long-format CSV into binary labels by image.
-    RSNA CSV has columns:
-      ID, Label
-    where ID looks like: ID_xxx_any, ID_xxx_epidural, ...
+    Convert RSNA long-format CSV into wide multi-label format by image.
+    Output columns:
+      image_id, any, epidural, intraparenchymal, intraventricular,
+      subarachnoid, subdural, filepath
     """
     df = pd.read_csv(csv_path)
 
@@ -46,20 +46,33 @@ def build_binary_labels(csv_path: str, positive_class: str = "any") -> pd.DataFr
     df["image_id"] = split_df[0]
     df["subtype"] = split_df[1]
 
-    # Pivot to wide format
-    pivot_df = df.pivot(index="image_id", columns="subtype", values="Label").reset_index()
+    # Handle duplicate (image_id, subtype) safely
+    dup_count = df.duplicated(subset=["image_id", "subtype"]).sum()
+    print(f"Duplicate (image_id, subtype) rows: {dup_count}")
+
+    pivot_df = df.pivot_table(
+        index="image_id",
+        columns="subtype",
+        values="Label",
+        aggfunc="max"
+    ).reset_index()
 
     # Fill missing subtype cols if needed
     expected_cols = [
-        "any", "epidural", "intraparenchymal",
-        "intraventricular", "subarachnoid", "subdural"
+        "any",
+        "epidural",
+        "intraparenchymal",
+        "intraventricular",
+        "subarachnoid",
+        "subdural",
     ]
     for col in expected_cols:
         if col not in pivot_df.columns:
             pivot_df[col] = 0.0
 
-    # Binary target from selected class
-    pivot_df["target"] = pivot_df[positive_class].astype(np.float32)
+    # Ensure float32
+    for col in expected_cols:
+        pivot_df[col] = pivot_df[col].astype(np.float32)
 
     # DICOM filename
     pivot_df["filepath"] = pivot_df["image_id"].apply(
@@ -73,6 +86,7 @@ class RSNADataset(Dataset):
     def __init__(self, dataframe: pd.DataFrame, config: Config):
         self.df = dataframe.reset_index(drop=True)
         self.config = config
+        self.label_cols = config.LABEL_COLS
 
     def __len__(self):
         return len(self.df)
@@ -80,7 +94,6 @@ class RSNADataset(Dataset):
     def __getitem__(self, idx: int):
         row = self.df.iloc[idx]
         dcm_path = row["filepath"]
-        target = np.float32(row["target"])
 
         dcm = pydicom.dcmread(dcm_path)
         image_hu = dicom_to_hu(dcm)
@@ -95,6 +108,8 @@ class RSNADataset(Dataset):
         # [H, W] -> [1, H, W]
         image = np.expand_dims(image, axis=0)
 
+        target = row[self.label_cols].values.astype(np.float32)
+
         return {
             "image": torch.tensor(image, dtype=torch.float32),
             "target": torch.tensor(target, dtype=torch.float32),
@@ -103,7 +118,7 @@ class RSNADataset(Dataset):
 
 
 def build_train_val_dataframes(config: Config):
-    df = build_binary_labels(config.CSV_PATH, config.POSITIVE_CLASS)
+    df = build_multilabel_df(config.CSV_PATH)
 
     # Keep only files that actually exist
     df = df[df["filepath"].apply(os.path.exists)].reset_index(drop=True)
@@ -114,11 +129,12 @@ def build_train_val_dataframes(config: Config):
             random_state=config.SEED
         ).reset_index(drop=True)
 
+    # For stratify, use "any" only to keep split simple
     train_df, val_df = train_test_split(
         df,
         test_size=config.VAL_RATIO,
         random_state=config.SEED,
-        stratify=df["target"]
+        stratify=df["any"]
     )
 
     return train_df.reset_index(drop=True), val_df.reset_index(drop=True)

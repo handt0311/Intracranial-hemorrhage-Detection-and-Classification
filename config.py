@@ -1,10 +1,11 @@
+
 import os
 
 class Config:
     # =========================
     # Paths for Kaggle
     # =========================
-    DATA_ROOT = "/kaggle/input/rsna-intracranial-hemorrhage-detection"
+    DATA_ROOT = "/kaggle/input/competitions/rsna-intracranial-hemorrhage-detection/rsna-intracranial-hemorrhage-detection"
     TRAIN_DIR = os.path.join(DATA_ROOT, "stage_2_train")
     CSV_PATH = os.path.join(DATA_ROOT, "stage_2_train.csv")
 
@@ -18,20 +19,27 @@ class Config:
     # =========================
     IMAGE_SIZE = 224
     NUM_WORKERS = 2
-    BATCH_SIZE = 16
+    BATCH_SIZE = 8
 
     # CT window
     WINDOW_CENTER = 40
     WINDOW_WIDTH = 80
 
-    # Classification setup
-    # Binary first: any hemorrhage vs no hemorrhage
-    POSITIVE_CLASS = "any"
+    # Multi-label setup
+    LABEL_COLS = [
+        "any",
+        "epidural",
+        "intraparenchymal",
+        "intraventricular",
+        "subarachnoid",
+        "subdural",
+    ]
+    NUM_CLASSES = 6
 
     # =========================
     # Train
     # =========================
-    EPOCHS = 3
+    EPOCHS = 1
     LR = 1e-4
     WEIGHT_DECAY = 1e-5
     SEED = 42
@@ -39,6 +47,6 @@ class Config:
 
     # Use only a subset first for debugging
     DEBUG = True
-    DEBUG_SAMPLES = 5000
+    DEBUG_SAMPLES = 2000
 
     DEVICE = "cuda"
