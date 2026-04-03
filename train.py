@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 import torch
@@ -41,19 +40,16 @@ def train_one_epoch(model, loader, optimizer, criterion, device, epoch, total_ep
 
     for batch in progress_bar:
         images = batch["image"].to(device)
-        targets = batch["target"].to(device)   # [B, 6]
+        targets = batch["target"].to(device)
 
         optimizer.zero_grad()
-        logits = model(images)                 # [B, 6]
+        logits = model(images)
         loss = criterion(logits, targets)
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item() * images.size(0)
-
-        progress_bar.set_postfix({
-            "batch_loss": f"{loss.item():.4f}"
-        })
+        progress_bar.set_postfix({"batch_loss": f"{loss.item():.4f}"})
 
     return total_loss / len(loader.dataset)
 
@@ -74,24 +70,19 @@ def validate(model, loader, criterion, device, label_names, epoch, total_epochs)
 
         logits = model(images)
         loss = criterion(logits, targets)
-
         probs = torch.sigmoid(logits)
 
         total_loss += loss.item() * images.size(0)
         all_targets.append(targets.cpu().numpy())
         all_probs.append(probs.cpu().numpy())
 
-        progress_bar.set_postfix({
-            "batch_loss": f"{loss.item():.4f}"
-        })
+        progress_bar.set_postfix({"batch_loss": f"{loss.item():.4f}"})
 
     val_loss = total_loss / len(loader.dataset)
-
-    all_targets = np.concatenate(all_targets, axis=0)   # [N, 6]
-    all_probs = np.concatenate(all_probs, axis=0)       # [N, 6]
+    all_targets = np.concatenate(all_targets, axis=0)
+    all_probs = np.concatenate(all_probs, axis=0)
 
     mean_auc, auc_dict = compute_multilabel_auc(all_targets, all_probs, label_names)
-
     return val_loss, mean_auc, auc_dict
 
 
@@ -102,6 +93,8 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+    print(f"Head type: {config.HEAD_TYPE}")
+    print(f"Run name: {config.RUN_NAME}")
 
     print("Building dataframes...")
     train_df, val_df = build_train_val_dataframes(config)
@@ -129,7 +122,12 @@ def main():
 
     model = RSNAClassifier(
         num_classes=config.NUM_CLASSES,
-        pretrained=False
+        pretrained=False,
+        head_type=config.HEAD_TYPE,
+        mlp_hidden_dim=config.MLP_HIDDEN_DIM,
+        dropout=config.DROPOUT,
+        kan_num_basis=config.KAN_NUM_BASIS,
+        kan_hidden_dim=config.KAN_HIDDEN_DIM,
     ).to(device)
 
     criterion = nn.BCEWithLogitsLoss()
@@ -162,7 +160,7 @@ def main():
 
         if not np.isnan(val_mean_auc) and val_mean_auc > best_auc:
             best_auc = val_mean_auc
-            save_path = os.path.join(config.OUTPUT_DIR, "best_model_multilabel.pth")
+            save_path = os.path.join(config.OUTPUT_DIR, f"{config.RUN_NAME}.pth")
             torch.save(model.state_dict(), save_path)
             print(f"Saved best model to: {save_path}")
 

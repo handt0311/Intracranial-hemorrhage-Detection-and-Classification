@@ -1,18 +1,101 @@
-
+import math
 import torch
 import torch.nn as nn
 import torchvision.models as models
 
 
+class LinearHead(nn.Module):
+    def __init__(self, in_features: int, num_classes: int):
+        super().__init__()
+        self.fc = nn.Linear(in_features, num_classes)
+
+    def forward(self, x):
+        return self.fc(x)
+
+
+class MLPHead(nn.Module):
+    def __init__(self, in_features: int, num_classes: int, hidden_dim: int = 256, dropout: float = 0.2):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_features, hidden_dim),
+            nn.ReLU(inplace=True),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, num_classes),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+class SimpleKANHead(nn.Module):
+    """
+    KAN-style head chạy được ngay:
+    - mở rộng feature bằng Gaussian basis
+    - rồi đưa qua MLP nhỏ để ra logits
+
+    Đây là head kiểu basis-expansion inspired by KAN,
+    tiện để so sánh thực nghiệm với linear và mlp trên Kaggle.
+    """
+    def __init__(
+        self,
+        in_features: int,
+        num_classes: int,
+        num_basis: int = 8,
+        hidden_dim: int = 256,
+        dropout: float = 0.2,
+    ):
+        super().__init__()
+        self.in_features = in_features
+        self.num_basis = num_basis
+
+        centers = torch.linspace(-2.0, 2.0, num_basis)
+        self.register_buffer("centers", centers)
+
+        self.log_sigma = nn.Parameter(torch.tensor(math.log(0.5), dtype=torch.float32))
+
+        expanded_dim = in_features * num_basis
+
+        self.net = nn.Sequential(
+            nn.Linear(expanded_dim, hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, num_classes),
+        )
+
+    def forward(self, x):
+        # x: [B, D]
+        sigma = torch.exp(self.log_sigma).clamp(min=1e-3)
+
+        # chuẩn hóa nhẹ feature để basis ổn định hơn
+        x_norm = torch.tanh(x)
+
+        # [B, D, 1] - [K] -> [B, D, K]
+        basis = torch.exp(-((x_norm.unsqueeze(-1) - self.centers) ** 2) / (2 * sigma ** 2))
+
+        # flatten: [B, D*K]
+        basis = basis.flatten(start_dim=1)
+
+        return self.net(basis)
+
+
 class RSNAClassifier(nn.Module):
-    def __init__(self, num_classes: int = 6, pretrained: bool = False):
+    def __init__(
+        self,
+        num_classes: int = 6,
+        pretrained: bool = False,
+        head_type: str = "mlp",
+        mlp_hidden_dim: int = 256,
+        dropout: float = 0.2,
+        kan_num_basis: int = 8,
+        kan_hidden_dim: int = 256,
+    ):
         super().__init__()
 
         self.backbone = models.resnet18(
             weights=None if not pretrained else models.ResNet18_Weights.DEFAULT
         )
 
-        # Change first conv to accept 1-channel image
+        # 1-channel input
         self.backbone.conv1 = nn.Conv2d(
             1, 64, kernel_size=7, stride=2, padding=3, bias=False
         )
@@ -20,14 +103,30 @@ class RSNAClassifier(nn.Module):
         in_features = self.backbone.fc.in_features
         self.backbone.fc = nn.Identity()
 
-        self.classifier = nn.Sequential(
-            nn.Linear(in_features, 256),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.2),
-            nn.Linear(256, num_classes)
-        )
+        head_type = head_type.lower()
+        self.head_type = head_type
+
+        if head_type == "linear":
+            self.classifier = LinearHead(in_features, num_classes)
+        elif head_type == "mlp":
+            self.classifier = MLPHead(
+                in_features=in_features,
+                num_classes=num_classes,
+                hidden_dim=mlp_hidden_dim,
+                dropout=dropout,
+            )
+        elif head_type == "kan":
+            self.classifier = SimpleKANHead(
+                in_features=in_features,
+                num_classes=num_classes,
+                num_basis=kan_num_basis,
+                hidden_dim=kan_hidden_dim,
+                dropout=dropout,
+            )
+        else:
+            raise ValueError(f"Unsupported head_type: {head_type}")
 
     def forward(self, x):
         feat = self.backbone(x)
-        logits = self.classifier(feat)   # [B, 6]
+        logits = self.classifier(feat)
         return logits
