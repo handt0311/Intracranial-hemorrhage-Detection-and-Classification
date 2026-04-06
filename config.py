@@ -53,7 +53,7 @@ class Config:
     # =========================
     # Train
     # =========================
-    EPOCHS = 3
+    EPOCHS = 10
     LR = 1e-4
     WEIGHT_DECAY = 1e-5
     SEED = 42

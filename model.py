@@ -29,12 +29,12 @@ class MLPHead(nn.Module):
 
 class SimpleKANHead(nn.Module):
     """
-    KAN-style head chạy được ngay:
-    - mở rộng feature bằng Gaussian basis
-    - rồi đưa qua MLP nhỏ để ra logits
+    A practical KAN-style head:
+    - expands features with a Gaussian basis
+    - then passes them through a small MLP to produce logits
 
-    Đây là head kiểu basis-expansion inspired by KAN,
-    tiện để so sánh thực nghiệm với linear và mlp trên Kaggle.
+    This is a basis-expansion head inspired by KAN,
+    useful for experimental comparison with linear and MLP heads on Kaggle.
     """
     def __init__(
         self,
@@ -66,7 +66,7 @@ class SimpleKANHead(nn.Module):
         # x: [B, D]
         sigma = torch.exp(self.log_sigma).clamp(min=1e-3)
 
-        # chuẩn hóa nhẹ feature để basis ổn định hơn
+        # Light feature normalization to make basis values more stable
         x_norm = torch.tanh(x)
 
         # [B, D, 1] - [K] -> [B, D, K]
