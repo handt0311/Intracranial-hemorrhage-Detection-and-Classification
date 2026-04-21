@@ -1,31 +1,36 @@
 import cv2
 import numpy as np
 
+
 def apply_window(image_hu: np.ndarray, center: float, width: float) -> np.ndarray:
     """
-    Apply CT windowing.
+    Apply CT windowing and clip to [lower, upper].
     """
-    lower = center - width / 2
-    upper = center + width / 2
+    lower = center - width / 2.0
+    upper = center + width / 2.0
     image = np.clip(image_hu, lower, upper)
-    return image
+    return image.astype(np.float32)
 
-def normalize_minmax(image: np.ndarray) -> np.ndarray:
+
+def normalize_by_window(image: np.ndarray, center: float, width: float) -> np.ndarray:
     """
-    Normalize to [0, 1].
+    Normalize using the fixed CT window range, not per-image min/max.
+    Output in [0, 1].
     """
-    image = image.astype(np.float32)
-    min_val = image.min()
-    max_val = image.max()
-    if max_val - min_val < 1e-6:
-        return np.zeros_like(image, dtype=np.float32)
-    return (image - min_val) / (max_val - min_val)
+    lower = center - width / 2.0
+    upper = center + width / 2.0
+
+    image = (image - lower) / (upper - lower)
+    image = np.clip(image, 0.0, 1.0)
+    return image.astype(np.float32)
+
 
 def resize_image(image: np.ndarray, size: int) -> np.ndarray:
     """
     Resize to square size x size.
     """
     return cv2.resize(image, (size, size), interpolation=cv2.INTER_AREA)
+
 
 def preprocess_ct_slice(
     image_hu: np.ndarray,
@@ -35,9 +40,12 @@ def preprocess_ct_slice(
 ) -> np.ndarray:
     """
     Full preprocessing:
-    HU -> window -> normalize -> resize
+    HU -> window -> fixed-range normalize -> resize
     """
+    image_hu = np.nan_to_num(image_hu, nan=0.0, posinf=0.0, neginf=0.0).astype(np.float32)
+
     image = apply_window(image_hu, window_center, window_width)
-    image = normalize_minmax(image)
+    image = normalize_by_window(image, window_center, window_width)
     image = resize_image(image, image_size)
+
     return image.astype(np.float32)

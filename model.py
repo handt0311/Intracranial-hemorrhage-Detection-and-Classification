@@ -8,13 +8,25 @@ class LinearHead(nn.Module):
     def __init__(self, in_features: int, num_classes: int):
         super().__init__()
         self.fc = nn.Linear(in_features, num_classes)
+        self._init_weights()
+
+    def _init_weights(self):
+        nn.init.xavier_uniform_(self.fc.weight)
+        if self.fc.bias is not None:
+            nn.init.zeros_(self.fc.bias)
 
     def forward(self, x):
         return self.fc(x)
 
 
 class MLPHead(nn.Module):
-    def __init__(self, in_features: int, num_classes: int, hidden_dim: int = 256, dropout: float = 0.2):
+    def __init__(
+        self,
+        in_features: int,
+        num_classes: int,
+        hidden_dim: int = 256,
+        dropout: float = 0.2
+    ):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(in_features, hidden_dim),
@@ -22,6 +34,14 @@ class MLPHead(nn.Module):
             nn.Dropout(dropout),
             nn.Linear(hidden_dim, num_classes),
         )
+        self._init_weights()
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
 
     def forward(self, x):
         return self.net(x)
@@ -32,9 +52,6 @@ class SimpleKANHead(nn.Module):
     A practical KAN-style head:
     - expands features with a Gaussian basis
     - then passes them through a small MLP to produce logits
-
-    This is a basis-expansion head inspired by KAN,
-    useful for experimental comparison with linear and MLP heads on Kaggle.
     """
     def __init__(
         self,
@@ -51,7 +68,9 @@ class SimpleKANHead(nn.Module):
         centers = torch.linspace(-2.0, 2.0, num_basis)
         self.register_buffer("centers", centers)
 
-        self.log_sigma = nn.Parameter(torch.tensor(math.log(0.5), dtype=torch.float32))
+        self.log_sigma = nn.Parameter(
+            torch.tensor(math.log(0.5), dtype=torch.float32)
+        )
 
         expanded_dim = in_features * num_basis
 
@@ -61,18 +80,28 @@ class SimpleKANHead(nn.Module):
             nn.Dropout(dropout),
             nn.Linear(hidden_dim, num_classes),
         )
+        self._init_weights()
+
+    def _init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
 
     def forward(self, x):
         # x: [B, D]
         sigma = torch.exp(self.log_sigma).clamp(min=1e-3)
 
-        # Light feature normalization to make basis values more stable
+        # stabilize basis expansion
         x_norm = torch.tanh(x)
 
         # [B, D, 1] - [K] -> [B, D, K]
-        basis = torch.exp(-((x_norm.unsqueeze(-1) - self.centers) ** 2) / (2 * sigma ** 2))
+        basis = torch.exp(
+            -((x_norm.unsqueeze(-1) - self.centers) ** 2) / (2 * sigma ** 2)
+        )
 
-        # flatten: [B, D*K]
+        # [B, D*K]
         basis = basis.flatten(start_dim=1)
 
         return self.net(basis)
@@ -91,17 +120,29 @@ class RSNAClassifier(nn.Module):
     ):
         super().__init__()
 
-        self.backbone = models.resnet18(
-            weights=None if not pretrained else models.ResNet18_Weights.DEFAULT
-        )
+        weights = models.ResNet18_Weights.DEFAULT if pretrained else None
+        backbone = models.resnet18(weights=weights)
 
-        # 1-channel input
-        self.backbone.conv1 = nn.Conv2d(
+        old_conv1 = backbone.conv1
+
+        # Replace 3-channel conv with 1-channel conv
+        backbone.conv1 = nn.Conv2d(
             1, 64, kernel_size=7, stride=2, padding=3, bias=False
         )
 
-        in_features = self.backbone.fc.in_features
-        self.backbone.fc = nn.Identity()
+        if pretrained:
+            # Convert pretrained RGB conv weights -> grayscale by averaging channels
+            with torch.no_grad():
+                backbone.conv1.weight.copy_(old_conv1.weight.mean(dim=1, keepdim=True))
+        else:
+            nn.init.kaiming_normal_(
+                backbone.conv1.weight, mode="fan_out", nonlinearity="relu"
+            )
+
+        in_features = backbone.fc.in_features
+        backbone.fc = nn.Identity()
+
+        self.backbone = backbone
 
         head_type = head_type.lower()
         self.head_type = head_type
