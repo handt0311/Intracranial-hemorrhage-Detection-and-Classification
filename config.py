@@ -4,7 +4,7 @@ from datetime import datetime
 
 class Config:
     # =========================
-    # Paths for Dataset
+    # Paths for dataset
     # =========================
     DATA_ROOT = "/storage/student5/handt/rsna-intracranial-hemorrhage-detection"
     TRAIN_DIR = os.path.join(DATA_ROOT, "stage_2_train")
@@ -48,15 +48,17 @@ class Config:
 
     # Model head
     # Options: "linear", "mlp", "kan"
-    HEAD_TYPE = "linear"
+    HEAD_TYPE = "kan"
 
-    # For MLP
+    # MLP head settings
     MLP_HIDDEN_DIM = 256
     DROPOUT = 0.2
 
-    # For KAN-style head
-    KAN_NUM_BASIS = 8
-    KAN_HIDDEN_DIM = 256
+    # True KAN head settings
+    KAN_HIDDEN_DIM = 64
+    KAN_GRID_SIZE = 16
+    KAN_GRID_MIN = -2.0
+    KAN_GRID_MAX = 2.0
 
     # =========================
     # Train
@@ -75,7 +77,7 @@ class Config:
     CLIP_GRAD_NORM = 1.0
 
     # =========================
-    # LR Scheduler
+    # LR scheduler
     # =========================
     SCHEDULER_NAME = "ReduceLROnPlateau"
     SCHEDULER_MODE = "max"
@@ -103,12 +105,12 @@ class Config:
     TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
     RUN_NAME = f"{BACKBONE}_{HEAD_TYPE}_scratch_ep{EPOCHS}_{TIMESTAMP}"
 
-    # folder theo head rồi tới từng lần train
+    # Group outputs by head type, then by individual run
     HEAD_OUTPUT_DIR = os.path.join(OUTPUT_ROOT, HEAD_TYPE)
     OUTPUT_DIR = os.path.join(HEAD_OUTPUT_DIR, RUN_NAME)
 
     # =========================
-    # Saving / Logging
+    # Saving / logging
     # =========================
     SAVE_BEST_ONLY = True
     SAVE_LAST = True

@@ -234,8 +234,10 @@ def main():
         head_type=config.HEAD_TYPE,
         mlp_hidden_dim=config.MLP_HIDDEN_DIM,
         dropout=config.DROPOUT,
-        kan_num_basis=config.KAN_NUM_BASIS,
         kan_hidden_dim=config.KAN_HIDDEN_DIM,
+        kan_grid_size=config.KAN_GRID_SIZE,
+        kan_grid_min=config.KAN_GRID_MIN,
+        kan_grid_max=config.KAN_GRID_MAX,
     ).to(device)
 
     criterion = nn.BCEWithLogitsLoss()
