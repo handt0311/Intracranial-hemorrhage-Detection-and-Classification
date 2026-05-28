@@ -1,0 +1,581 @@
+Using device: cuda
+AMP enabled: True
+Head type: kan
+Run name: resnet18_kan_scratch_ep100_20260423_152151
+Saving outputs to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151
+Building dataframes...
+Train samples: 677521
+Val samples: 75281
+
+Epoch [1/100] lr=0.0005 train_loss=0.1402 val_loss=0.1397 val_mean_auc=0.8864
+  any: 0.9140
+  epidural: 0.8003
+  intraparenchymal: 0.9313
+  intraventricular: 0.9351
+  subarachnoid: 0.8733
+  subdural: 0.8647
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.8864
+
+Epoch [2/100] lr=0.0005 train_loss=0.1239 val_loss=0.1337 val_mean_auc=0.9062
+  any: 0.9263
+  epidural: 0.8275
+  intraparenchymal: 0.9449
+  intraventricular: 0.9598
+  subarachnoid: 0.8915
+  subdural: 0.8869
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9062
+
+Epoch [3/100] lr=0.0005 train_loss=0.1193 val_loss=0.1178 val_mean_auc=0.9135
+  any: 0.9309
+  epidural: 0.8400
+  intraparenchymal: 0.9478
+  intraventricular: 0.9655
+  subarachnoid: 0.9029
+  subdural: 0.8941
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9135
+
+Epoch [4/100] lr=0.0005 train_loss=0.1165 val_loss=0.1106 val_mean_auc=0.9188
+  any: 0.9347
+  epidural: 0.8520
+  intraparenchymal: 0.9504
+  intraventricular: 0.9663
+  subarachnoid: 0.9023
+  subdural: 0.9071
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9188
+
+Epoch [5/100] lr=0.0005 train_loss=0.1152 val_loss=0.1101 val_mean_auc=0.9182
+  any: 0.9335
+  epidural: 0.8484
+  intraparenchymal: 0.9493
+  intraventricular: 0.9678
+  subarachnoid: 0.9039
+  subdural: 0.9065
+No improvement. Early stopping counter: 1/12
+
+Epoch [6/100] lr=0.0005 train_loss=0.1143 val_loss=0.1106 val_mean_auc=0.9185
+  any: 0.9326
+  epidural: 0.8467
+  intraparenchymal: 0.9530
+  intraventricular: 0.9726
+  subarachnoid: 0.9036
+  subdural: 0.9025
+No improvement. Early stopping counter: 2/12
+
+Epoch [7/100] lr=0.0005 train_loss=0.1137 val_loss=0.1115 val_mean_auc=0.9187
+  any: 0.9343
+  epidural: 0.8485
+  intraparenchymal: 0.9479
+  intraventricular: 0.9693
+  subarachnoid: 0.9065
+  subdural: 0.9057
+No improvement. Early stopping counter: 3/12
+
+Epoch [8/100] lr=0.0005 train_loss=0.1133 val_loss=0.1150 val_mean_auc=0.9173
+  any: 0.9336
+  epidural: 0.8430
+  intraparenchymal: 0.9494
+  intraventricular: 0.9691
+  subarachnoid: 0.9057
+  subdural: 0.9031
+No improvement. Early stopping counter: 4/12
+
+Epoch [9/100] lr=0.00025 train_loss=0.1077 val_loss=0.1094 val_mean_auc=0.9207
+  any: 0.9357
+  epidural: 0.8522
+  intraparenchymal: 0.9496
+  intraventricular: 0.9732
+  subarachnoid: 0.9057
+  subdural: 0.9076
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9207
+
+Epoch [10/100] lr=0.00025 train_loss=0.1076 val_loss=0.1099 val_mean_auc=0.9270
+  any: 0.9415
+  epidural: 0.8677
+  intraparenchymal: 0.9510
+  intraventricular: 0.9705
+  subarachnoid: 0.9152
+  subdural: 0.9159
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9270
+
+Epoch [11/100] lr=0.00025 train_loss=0.1078 val_loss=0.1076 val_mean_auc=0.9266
+  any: 0.9405
+  epidural: 0.8623
+  intraparenchymal: 0.9528
+  intraventricular: 0.9744
+  subarachnoid: 0.9143
+  subdural: 0.9151
+No improvement. Early stopping counter: 1/12
+
+Epoch [12/100] lr=0.00025 train_loss=0.1082 val_loss=0.1574 val_mean_auc=0.9004
+  any: 0.9197
+  epidural: 0.8322
+  intraparenchymal: 0.9219
+  intraventricular: 0.9633
+  subarachnoid: 0.8822
+  subdural: 0.8834
+No improvement. Early stopping counter: 2/12
+
+Epoch [13/100] lr=0.00025 train_loss=0.1083 val_loss=0.1032 val_mean_auc=0.9272
+  any: 0.9416
+  epidural: 0.8592
+  intraparenchymal: 0.9552
+  intraventricular: 0.9757
+  subarachnoid: 0.9171
+  subdural: 0.9142
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9272
+
+Epoch [14/100] lr=0.00025 train_loss=0.1084 val_loss=0.1021 val_mean_auc=0.9286
+  any: 0.9420
+  epidural: 0.8627
+  intraparenchymal: 0.9533
+  intraventricular: 0.9755
+  subarachnoid: 0.9188
+  subdural: 0.9195
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9286
+
+Epoch [15/100] lr=0.00025 train_loss=0.1085 val_loss=0.1108 val_mean_auc=0.9199
+  any: 0.9363
+  epidural: 0.8422
+  intraparenchymal: 0.9484
+  intraventricular: 0.9725
+  subarachnoid: 0.9141
+  subdural: 0.9058
+No improvement. Early stopping counter: 1/12
+
+Epoch [16/100] lr=0.00025 train_loss=0.1085 val_loss=0.1080 val_mean_auc=0.9265
+  any: 0.9416
+  epidural: 0.8573
+  intraparenchymal: 0.9528
+  intraventricular: 0.9758
+  subarachnoid: 0.9157
+  subdural: 0.9156
+No improvement. Early stopping counter: 2/12
+
+Epoch [17/100] lr=0.00025 train_loss=0.1085 val_loss=0.1136 val_mean_auc=0.9241
+  any: 0.9374
+  epidural: 0.8596
+  intraparenchymal: 0.9474
+  intraventricular: 0.9741
+  subarachnoid: 0.9135
+  subdural: 0.9124
+No improvement. Early stopping counter: 3/12
+
+Epoch [18/100] lr=0.00025 train_loss=0.1085 val_loss=0.1163 val_mean_auc=0.9231
+  any: 0.9370
+  epidural: 0.8595
+  intraparenchymal: 0.9503
+  intraventricular: 0.9763
+  subarachnoid: 0.9137
+  subdural: 0.9020
+No improvement. Early stopping counter: 4/12
+
+Epoch [19/100] lr=0.000125 train_loss=0.1041 val_loss=0.1054 val_mean_auc=0.9296
+  any: 0.9444
+  epidural: 0.8668
+  intraparenchymal: 0.9500
+  intraventricular: 0.9767
+  subarachnoid: 0.9196
+  subdural: 0.9202
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9296
+
+Epoch [20/100] lr=0.000125 train_loss=0.1040 val_loss=0.1027 val_mean_auc=0.9296
+  any: 0.9440
+  epidural: 0.8669
+  intraparenchymal: 0.9460
+  intraventricular: 0.9765
+  subarachnoid: 0.9217
+  subdural: 0.9226
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9296
+
+Epoch [21/100] lr=0.000125 train_loss=0.1043 val_loss=0.1111 val_mean_auc=0.9260
+  any: 0.9433
+  epidural: 0.8498
+  intraparenchymal: 0.9494
+  intraventricular: 0.9760
+  subarachnoid: 0.9197
+  subdural: 0.9180
+No improvement. Early stopping counter: 1/12
+
+Epoch [22/100] lr=0.000125 train_loss=0.1044 val_loss=0.1037 val_mean_auc=0.9312
+  any: 0.9446
+  epidural: 0.8719
+  intraparenchymal: 0.9481
+  intraventricular: 0.9767
+  subarachnoid: 0.9215
+  subdural: 0.9244
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9312
+
+Epoch [23/100] lr=0.000125 train_loss=0.1048 val_loss=0.1190 val_mean_auc=0.9233
+  any: 0.9398
+  epidural: 0.8633
+  intraparenchymal: 0.9430
+  intraventricular: 0.9714
+  subarachnoid: 0.9128
+  subdural: 0.9095
+No improvement. Early stopping counter: 1/12
+
+Epoch [24/100] lr=0.000125 train_loss=0.1048 val_loss=0.1195 val_mean_auc=0.9178
+  any: 0.9342
+  epidural: 0.8480
+  intraparenchymal: 0.9430
+  intraventricular: 0.9663
+  subarachnoid: 0.9060
+  subdural: 0.9093
+No improvement. Early stopping counter: 2/12
+
+Epoch [25/100] lr=0.000125 train_loss=0.1051 val_loss=0.1066 val_mean_auc=0.9307
+  any: 0.9448
+  epidural: 0.8693
+  intraparenchymal: 0.9497
+  intraventricular: 0.9764
+  subarachnoid: 0.9255
+  subdural: 0.9187
+No improvement. Early stopping counter: 3/12
+
+Epoch [26/100] lr=0.000125 train_loss=0.1050 val_loss=0.1045 val_mean_auc=0.9304
+  any: 0.9440
+  epidural: 0.8679
+  intraparenchymal: 0.9527
+  intraventricular: 0.9779
+  subarachnoid: 0.9212
+  subdural: 0.9187
+No improvement. Early stopping counter: 4/12
+
+Epoch [27/100] lr=6.25e-05 train_loss=0.1018 val_loss=0.1060 val_mean_auc=0.9302
+  any: 0.9470
+  epidural: 0.8635
+  intraparenchymal: 0.9496
+  intraventricular: 0.9769
+  subarachnoid: 0.9234
+  subdural: 0.9210
+No improvement. Early stopping counter: 5/12
+
+Epoch [28/100] lr=6.25e-05 train_loss=0.1018 val_loss=0.1034 val_mean_auc=0.9328
+  any: 0.9484
+  epidural: 0.8668
+  intraparenchymal: 0.9539
+  intraventricular: 0.9785
+  subarachnoid: 0.9282
+  subdural: 0.9210
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9328
+
+Epoch [29/100] lr=6.25e-05 train_loss=0.1020 val_loss=0.1035 val_mean_auc=0.9330
+  any: 0.9487
+  epidural: 0.8724
+  intraparenchymal: 0.9485
+  intraventricular: 0.9770
+  subarachnoid: 0.9261
+  subdural: 0.9254
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9330
+
+Epoch [30/100] lr=6.25e-05 train_loss=0.1021 val_loss=0.1295 val_mean_auc=0.9147
+  any: 0.9274
+  epidural: 0.8625
+  intraparenchymal: 0.9388
+  intraventricular: 0.9652
+  subarachnoid: 0.8909
+  subdural: 0.9033
+No improvement. Early stopping counter: 1/12
+
+Epoch [31/100] lr=6.25e-05 train_loss=0.1023 val_loss=0.1095 val_mean_auc=0.9287
+  any: 0.9467
+  epidural: 0.8549
+  intraparenchymal: 0.9507
+  intraventricular: 0.9754
+  subarachnoid: 0.9273
+  subdural: 0.9174
+No improvement. Early stopping counter: 2/12
+
+Epoch [32/100] lr=6.25e-05 train_loss=0.1024 val_loss=0.1123 val_mean_auc=0.9279
+  any: 0.9445
+  epidural: 0.8647
+  intraparenchymal: 0.9474
+  intraventricular: 0.9698
+  subarachnoid: 0.9180
+  subdural: 0.9227
+No improvement. Early stopping counter: 3/12
+
+Epoch [33/100] lr=6.25e-05 train_loss=0.1025 val_loss=0.1062 val_mean_auc=0.9324
+  any: 0.9477
+  epidural: 0.8679
+  intraparenchymal: 0.9534
+  intraventricular: 0.9764
+  subarachnoid: 0.9267
+  subdural: 0.9222
+No improvement. Early stopping counter: 4/12
+
+Epoch [34/100] lr=3.125e-05 train_loss=0.1003 val_loss=0.1036 val_mean_auc=0.9348
+  any: 0.9509
+  epidural: 0.8719
+  intraparenchymal: 0.9540
+  intraventricular: 0.9769
+  subarachnoid: 0.9292
+  subdural: 0.9260
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9348
+
+Epoch [35/100] lr=3.125e-05 train_loss=0.1003 val_loss=0.1025 val_mean_auc=0.9345
+  any: 0.9505
+  epidural: 0.8706
+  intraparenchymal: 0.9518
+  intraventricular: 0.9774
+  subarachnoid: 0.9324
+  subdural: 0.9243
+No improvement. Early stopping counter: 1/12
+
+Epoch [36/100] lr=3.125e-05 train_loss=0.1005 val_loss=0.1033 val_mean_auc=0.9331
+  any: 0.9497
+  epidural: 0.8705
+  intraparenchymal: 0.9466
+  intraventricular: 0.9765
+  subarachnoid: 0.9274
+  subdural: 0.9278
+No improvement. Early stopping counter: 2/12
+
+Epoch [37/100] lr=3.125e-05 train_loss=0.1006 val_loss=0.1033 val_mean_auc=0.9327
+  any: 0.9486
+  epidural: 0.8678
+  intraparenchymal: 0.9530
+  intraventricular: 0.9773
+  subarachnoid: 0.9272
+  subdural: 0.9223
+No improvement. Early stopping counter: 3/12
+
+Epoch [38/100] lr=3.125e-05 train_loss=0.1007 val_loss=0.1023 val_mean_auc=0.9335
+  any: 0.9487
+  epidural: 0.8691
+  intraparenchymal: 0.9516
+  intraventricular: 0.9768
+  subarachnoid: 0.9295
+  subdural: 0.9255
+No improvement. Early stopping counter: 4/12
+
+Epoch [39/100] lr=1.5625e-05 train_loss=0.0993 val_loss=0.1000 val_mean_auc=0.9358
+  any: 0.9516
+  epidural: 0.8726
+  intraparenchymal: 0.9515
+  intraventricular: 0.9770
+  subarachnoid: 0.9323
+  subdural: 0.9299
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9358
+
+Epoch [40/100] lr=1.5625e-05 train_loss=0.0994 val_loss=0.1101 val_mean_auc=0.9315
+  any: 0.9492
+  epidural: 0.8673
+  intraparenchymal: 0.9467
+  intraventricular: 0.9748
+  subarachnoid: 0.9265
+  subdural: 0.9242
+No improvement. Early stopping counter: 1/12
+
+Epoch [41/100] lr=1.5625e-05 train_loss=0.0994 val_loss=0.1026 val_mean_auc=0.9360
+  any: 0.9528
+  epidural: 0.8740
+  intraparenchymal: 0.9507
+  intraventricular: 0.9765
+  subarachnoid: 0.9320
+  subdural: 0.9302
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9360
+
+Epoch [42/100] lr=1.5625e-05 train_loss=0.0993 val_loss=0.1018 val_mean_auc=0.9365
+  any: 0.9530
+  epidural: 0.8729
+  intraparenchymal: 0.9541
+  intraventricular: 0.9778
+  subarachnoid: 0.9321
+  subdural: 0.9294
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9365
+
+Epoch [43/100] lr=1.5625e-05 train_loss=0.0996 val_loss=0.1188 val_mean_auc=0.9228
+  any: 0.9389
+  epidural: 0.8699
+  intraparenchymal: 0.9392
+  intraventricular: 0.9640
+  subarachnoid: 0.9043
+  subdural: 0.9206
+No improvement. Early stopping counter: 1/12
+
+Epoch [44/100] lr=1.5625e-05 train_loss=0.0995 val_loss=0.1020 val_mean_auc=0.9354
+  any: 0.9522
+  epidural: 0.8715
+  intraparenchymal: 0.9524
+  intraventricular: 0.9759
+  subarachnoid: 0.9330
+  subdural: 0.9274
+No improvement. Early stopping counter: 2/12
+
+Epoch [45/100] lr=1.5625e-05 train_loss=0.0996 val_loss=0.1071 val_mean_auc=0.9329
+  any: 0.9514
+  epidural: 0.8708
+  intraparenchymal: 0.9452
+  intraventricular: 0.9730
+  subarachnoid: 0.9307
+  subdural: 0.9265
+No improvement. Early stopping counter: 3/12
+
+Epoch [46/100] lr=1.5625e-05 train_loss=0.0995 val_loss=0.1030 val_mean_auc=0.9355
+  any: 0.9515
+  epidural: 0.8749
+  intraparenchymal: 0.9517
+  intraventricular: 0.9768
+  subarachnoid: 0.9292
+  subdural: 0.9290
+No improvement. Early stopping counter: 4/12
+
+Epoch [47/100] lr=7.8125e-06 train_loss=0.0988 val_loss=0.0995 val_mean_auc=0.9371
+  any: 0.9523
+  epidural: 0.8742
+  intraparenchymal: 0.9557
+  intraventricular: 0.9786
+  subarachnoid: 0.9327
+  subdural: 0.9293
+Saved best model to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth
+Saved best val predictions to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/val_predictions.csv
+Best val_mean_auc so far: 0.9371
+
+Epoch [48/100] lr=7.8125e-06 train_loss=0.0987 val_loss=0.1041 val_mean_auc=0.9351
+  any: 0.9525
+  epidural: 0.8725
+  intraparenchymal: 0.9475
+  intraventricular: 0.9761
+  subarachnoid: 0.9324
+  subdural: 0.9298
+No improvement. Early stopping counter: 1/12
+
+Epoch [49/100] lr=7.8125e-06 train_loss=0.0988 val_loss=0.1081 val_mean_auc=0.9301
+  any: 0.9455
+  epidural: 0.8733
+  intraparenchymal: 0.9449
+  intraventricular: 0.9709
+  subarachnoid: 0.9213
+  subdural: 0.9246
+No improvement. Early stopping counter: 2/12
+
+Epoch [50/100] lr=7.8125e-06 train_loss=0.0988 val_loss=0.1052 val_mean_auc=0.9352
+  any: 0.9523
+  epidural: 0.8753
+  intraparenchymal: 0.9479
+  intraventricular: 0.9759
+  subarachnoid: 0.9316
+  subdural: 0.9283
+No improvement. Early stopping counter: 3/12
+
+Epoch [51/100] lr=7.8125e-06 train_loss=0.0989 val_loss=0.1088 val_mean_auc=0.9322
+  any: 0.9483
+  epidural: 0.8758
+  intraparenchymal: 0.9488
+  intraventricular: 0.9717
+  subarachnoid: 0.9227
+  subdural: 0.9257
+No improvement. Early stopping counter: 4/12
+
+Epoch [52/100] lr=3.90625e-06 train_loss=0.0984 val_loss=0.1039 val_mean_auc=0.9353
+  any: 0.9522
+  epidural: 0.8736
+  intraparenchymal: 0.9515
+  intraventricular: 0.9759
+  subarachnoid: 0.9312
+  subdural: 0.9275
+No improvement. Early stopping counter: 5/12
+
+Epoch [53/100] lr=3.90625e-06 train_loss=0.0983 val_loss=0.1043 val_mean_auc=0.9353
+  any: 0.9522
+  epidural: 0.8740
+  intraparenchymal: 0.9493
+  intraventricular: 0.9769
+  subarachnoid: 0.9314
+  subdural: 0.9283
+No improvement. Early stopping counter: 6/12
+
+Epoch [54/100] lr=3.90625e-06 train_loss=0.0984 val_loss=0.1032 val_mean_auc=0.9357
+  any: 0.9526
+  epidural: 0.8739
+  intraparenchymal: 0.9507
+  intraventricular: 0.9758
+  subarachnoid: 0.9324
+  subdural: 0.9288
+No improvement. Early stopping counter: 7/12
+
+Epoch [55/100] lr=3.90625e-06 train_loss=0.0985 val_loss=0.1041 val_mean_auc=0.9357
+  any: 0.9527
+  epidural: 0.8753
+  intraparenchymal: 0.9497
+  intraventricular: 0.9754
+  subarachnoid: 0.9315
+  subdural: 0.9298
+No improvement. Early stopping counter: 8/12
+
+Epoch [56/100] lr=1.95313e-06 train_loss=0.0983 val_loss=0.1051 val_mean_auc=0.9349
+  any: 0.9525
+  epidural: 0.8729
+  intraparenchymal: 0.9489
+  intraventricular: 0.9767
+  subarachnoid: 0.9310
+  subdural: 0.9276
+No improvement. Early stopping counter: 9/12
+
+Epoch [57/100] lr=1.95313e-06 train_loss=0.0982 val_loss=0.1013 val_mean_auc=0.9371
+  any: 0.9534
+  epidural: 0.8762
+  intraparenchymal: 0.9523
+  intraventricular: 0.9770
+  subarachnoid: 0.9336
+  subdural: 0.9301
+No improvement. Early stopping counter: 10/12
+
+Epoch [58/100] lr=1.95313e-06 train_loss=0.0982 val_loss=0.1028 val_mean_auc=0.9364
+  any: 0.9531
+  epidural: 0.8758
+  intraparenchymal: 0.9507
+  intraventricular: 0.9767
+  subarachnoid: 0.9327
+  subdural: 0.9293
+No improvement. Early stopping counter: 11/12
+
+Epoch [59/100] lr=1.95313e-06 train_loss=0.0982 val_loss=0.1045 val_mean_auc=0.9358
+  any: 0.9526
+  epidural: 0.8755
+  intraparenchymal: 0.9502
+  intraventricular: 0.9762
+  subarachnoid: 0.9306
+  subdural: 0.9294
+No improvement. Early stopping counter: 12/12
+Early stopping triggered.
+
+Training finished.
+Best val_mean_auc: 0.9371
+History saved to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/history.csv
+Last model saved to: /storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/last_model.pth

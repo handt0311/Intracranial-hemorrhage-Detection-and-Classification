@@ -1,0 +1,10 @@
+*.pth
+*.pt
+dataset/
+output/
+runs/
+*.pth
+*.pt
+*.zip
+output/
+runs/

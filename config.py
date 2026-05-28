@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 
 class Config:
@@ -48,7 +47,7 @@ class Config:
 
     # Model head
     # Options: "linear", "mlp", "kan"
-    HEAD_TYPE = "kan"
+    HEAD_TYPE = "mlp"
 
     # MLP head settings
     MLP_HIDDEN_DIM = 256
@@ -100,14 +99,14 @@ class Config:
     DEBUG_SAMPLES = None
 
     # =========================
-    # Run name / folder
+    # Resume MLP run cu
     # =========================
-    TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-    RUN_NAME = f"{BACKBONE}_{HEAD_TYPE}_scratch_ep{EPOCHS}_{TIMESTAMP}"
-
-    # Group outputs by head type, then by individual run
-    HEAD_OUTPUT_DIR = os.path.join(OUTPUT_ROOT, HEAD_TYPE)
+    RUN_NAME = "resnet18_mlp_scratch_ep100_20260429_031344"
+    HEAD_OUTPUT_DIR = os.path.join(OUTPUT_ROOT, "mlp")
     OUTPUT_DIR = os.path.join(HEAD_OUTPUT_DIR, RUN_NAME)
+
+    AUTO_RESUME = True
+    RESUME_PATH = os.path.join(OUTPUT_DIR, "last_checkpoint.pth")
 
     # =========================
     # Saving / logging
