@@ -46,18 +46,44 @@ class Config:
     PRETRAINED = False
 
     # Model head
-    # Options: "linear", "mlp", "kan"
-    HEAD_TYPE = "mlp"
+    # Options:
+    #   "linear"       : simple linear classifier head
+    #   "mlp"          : MLP classifier head
+    #   "kan"          : old/custom KAN-inspired head
+    #   "kan_custom"   : same as old/custom KAN-inspired head
+    #   "kan_official" : official pykan-based KAN head
+    #   "official_kan" : same as kan_official
+    #   "pykan"        : same as kan_official
+    HEAD_TYPE = "kan_official"
 
     # MLP head settings
     MLP_HIDDEN_DIM = 256
     DROPOUT = 0.2
 
-    # True KAN head settings
+    # =========================
+    # Old/custom KAN head settings
+    # Used only when HEAD_TYPE = "kan" or "kan_custom"
+    # =========================
     KAN_HIDDEN_DIM = 64
     KAN_GRID_SIZE = 16
     KAN_GRID_MIN = -2.0
     KAN_GRID_MAX = 2.0
+
+    # =========================
+    # Official pykan KAN head settings
+    # Used only when HEAD_TYPE = "kan_official", "official_kan", or "pykan"
+    #
+    # With ResNet18:
+    #   feature dim = 512
+    #   KAN head = KAN(width=[512, KAN_OFFICIAL_HIDDEN_DIM, 6],
+    #                  grid=KAN_OFFICIAL_GRID,
+    #                  k=KAN_OFFICIAL_K)
+    # =========================
+    KAN_OFFICIAL_HIDDEN_DIM = 16
+    KAN_OFFICIAL_GRID = 5
+    KAN_OFFICIAL_K = 3
+    KAN_OFFICIAL_SEED = 42
+    KAN_OFFICIAL_SPEED_MODE = True
 
     # =========================
     # Train
@@ -99,13 +125,16 @@ class Config:
     DEBUG_SAMPLES = None
 
     # =========================
-    # Resume MLP run cu
+    # Current run
     # =========================
-    RUN_NAME = "resnet18_mlp_scratch_ep100_20260429_031344"
-    HEAD_OUTPUT_DIR = os.path.join(OUTPUT_ROOT, "mlp")
+    RUN_NAME = "resnet18_kan_official_scratch_ep100"
+    HEAD_OUTPUT_DIR = os.path.join(OUTPUT_ROOT, "kan_official")
     OUTPUT_DIR = os.path.join(HEAD_OUTPUT_DIR, RUN_NAME)
 
-    AUTO_RESUME = True
+    # IMPORTANT:
+    # Set False because this is a new official KAN head.
+    # Do not resume from old MLP/custom-KAN checkpoint.
+    AUTO_RESUME = False
     RESUME_PATH = os.path.join(OUTPUT_DIR, "last_checkpoint.pth")
 
     # =========================

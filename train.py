@@ -188,7 +188,7 @@ def restore_rng_state(checkpoint: dict, use_cuda: bool):
         if use_cuda and torch.cuda.is_available() and "cuda_rng_state_all" in checkpoint:
             torch.cuda.set_rng_state_all(checkpoint["cuda_rng_state_all"])
     except Exception:
-        # Nếu RNG state cũ không restore được thì vẫn tiếp tục train bình thường
+        # If an old RNG state cannot be restored, continue training normally.
         pass
 
 
@@ -242,7 +242,7 @@ def load_resume_state(
         candidate_paths.append(last_checkpoint_path)
         candidate_paths.append(last_model_path)
 
-    # bỏ trùng nhưng vẫn giữ thứ tự
+    # Remove duplicate paths while preserving order.
     seen = set()
     unique_candidate_paths = []
     for p in candidate_paths:
@@ -266,7 +266,7 @@ def load_resume_state(
         log_message(f"Found resume candidate: {path}", log_path)
         checkpoint = torch.load(path, map_location=device)
 
-        # Case 1: full checkpoint
+        # Case 1: full training checkpoint.
         if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
             model.load_state_dict(checkpoint["model_state_dict"], strict=True)
 
@@ -307,7 +307,7 @@ def load_resume_state(
                 "resume_source": path,
             }
 
-        # Case 2: old raw state_dict only
+        # Case 2: old checkpoint containing only raw state_dict.
         if isinstance(checkpoint, dict):
             try:
                 model.load_state_dict(checkpoint, strict=True)
@@ -435,7 +435,7 @@ def main():
     last_model_path = os.path.join(config.OUTPUT_DIR, config.LAST_MODEL_NAME)
     val_pred_path = os.path.join(config.OUTPUT_DIR, config.VAL_PRED_NAME)
 
-    # File checkpoint đầy đủ để resume đúng nghĩa
+    # Full checkpoints are used for exact resume.
     best_checkpoint_path = os.path.join(config.OUTPUT_DIR, "best_checkpoint.pth")
     last_checkpoint_path = os.path.join(config.OUTPUT_DIR, "last_checkpoint.pth")
 
@@ -451,6 +451,19 @@ def main():
     log_message(f"Head type: {config.HEAD_TYPE}", log_path)
     log_message(f"Run name: {config.RUN_NAME}", log_path)
     log_message(f"Saving outputs to: {config.OUTPUT_DIR}", log_path)
+
+    if str(config.HEAD_TYPE).lower() in ["kan_official", "official_kan", "pykan"]:
+        log_message(
+            (
+                "Official KAN settings: "
+                f"hidden_dim={getattr(config, 'KAN_OFFICIAL_HIDDEN_DIM', 16)}, "
+                f"grid={getattr(config, 'KAN_OFFICIAL_GRID', 5)}, "
+                f"k={getattr(config, 'KAN_OFFICIAL_K', 3)}, "
+                f"seed={getattr(config, 'KAN_OFFICIAL_SEED', config.SEED)}, "
+                f"speed_mode={getattr(config, 'KAN_OFFICIAL_SPEED_MODE', True)}"
+            ),
+            log_path,
+        )
 
     log_message("Building dataframes...", log_path)
     train_df, val_df = build_train_val_dataframes(config)
@@ -487,18 +500,32 @@ def main():
         head_type=config.HEAD_TYPE,
         mlp_hidden_dim=config.MLP_HIDDEN_DIM,
         dropout=config.DROPOUT,
+
+        # Old/custom KAN head parameters.
         kan_hidden_dim=config.KAN_HIDDEN_DIM,
         kan_grid_size=config.KAN_GRID_SIZE,
         kan_grid_min=config.KAN_GRID_MIN,
         kan_grid_max=config.KAN_GRID_MAX,
+
+        # Official pykan KAN head parameters.
+        kan_official_hidden_dim=getattr(config, "KAN_OFFICIAL_HIDDEN_DIM", 16),
+        kan_official_grid=getattr(config, "KAN_OFFICIAL_GRID", 5),
+        kan_official_k=getattr(config, "KAN_OFFICIAL_K", 3),
+        kan_official_seed=getattr(config, "KAN_OFFICIAL_SEED", config.SEED),
+        kan_official_speed_mode=getattr(config, "KAN_OFFICIAL_SPEED_MODE", True),
     ).to(device)
+
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    log_message(f"Total parameters: {total_params:,}", log_path)
+    log_message(f"Trainable parameters: {trainable_params:,}", log_path)
 
     criterion = nn.BCEWithLogitsLoss()
 
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=config.LR,
-        weight_decay=config.WEIGHT_DECAY
+        weight_decay=config.WEIGHT_DECAY,
     )
 
     scheduler = build_scheduler(optimizer, config)
@@ -536,7 +563,7 @@ def main():
             log_path,
         )
 
-        # nếu CSV bị rỗng/hỏng nhưng checkpoint còn history thì viết lại CSV
+        # If history.csv is missing or corrupted but checkpoint history exists, recover it.
         if len(history) > 0 and (
             (not os.path.exists(history_csv_path)) or os.path.getsize(history_csv_path) == 0
         ):
@@ -628,7 +655,8 @@ def main():
             else:
                 early_stop_counter += 1
 
-            # Luôn lưu checkpoint đầy đủ trước để nếu history.csv lỗi vẫn resume được
+            # Always save a full checkpoint first, so progress can be recovered
+            # even if history.csv fails to save.
             last_checkpoint = build_training_checkpoint(
                 model=model,
                 optimizer=optimizer,
@@ -642,11 +670,11 @@ def main():
             )
             save_checkpoint_atomic(last_checkpoint, last_checkpoint_path)
 
-            # Giữ file weights-only cũ để tương thích với code đánh giá cũ
+            # Keep the weights-only file for compatibility with older evaluation code.
             if config.SAVE_LAST:
                 save_state_dict_atomic(model.state_dict(), last_model_path)
 
-            # Save best
+            # Save best model and best full checkpoint.
             if improved:
                 best_checkpoint = build_training_checkpoint(
                     model=model,
@@ -684,7 +712,8 @@ def main():
                     log_path,
                 )
 
-            # Ghi history.csv kiểu an toàn; nếu lỗi thì vẫn không làm mất progress đã checkpoint
+            # Save history safely. If this fails, training progress is still recoverable
+            # from the full checkpoint.
             try:
                 save_history_atomic(history, history_csv_path)
             except OSError as e:
@@ -701,7 +730,8 @@ def main():
     except KeyboardInterrupt:
         log_message("\nTraining interrupted by user.", log_path)
 
-        # Nếu bị ngắt giữa epoch, resume sẽ quay lại từ đầu epoch đang dang dở
+        # If interrupted in the middle of an epoch, resume from the beginning
+        # of the interrupted epoch.
         completed_epoch = interrupted_epoch if interrupted_epoch is not None else start_epoch
 
         interrupted_checkpoint = build_training_checkpoint(

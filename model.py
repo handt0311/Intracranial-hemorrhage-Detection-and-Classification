@@ -4,6 +4,16 @@ import torch.nn.functional as F
 import torchvision.models as models
 
 
+# Optional import:
+# - linear / mlp / custom kan can still run without pykan installed
+# - official KAN head requires: pip install pykan
+try:
+    from kan import KAN as PyKAN
+except ImportError as e:
+    PyKAN = None
+    _PYKAN_IMPORT_ERROR = e
+
+
 class LinearHead(nn.Module):
     def __init__(self, in_features: int, num_classes: int):
         super().__init__()
@@ -49,19 +59,16 @@ class MLPHead(nn.Module):
 
 class KANLayer(nn.Module):
     """
-    A dependency-free KAN layer.
+    Custom dependency-free KAN-inspired layer.
 
-    This layer follows the KAN idea more closely than an MLP:
-    - each edge (input i -> output j) has its own learnable 1D function
+    This is the old/custom KAN-like implementation:
+    - each edge has a learnable 1D function
     - node outputs are sums of edge activations
-    - there is no dense linear weight matrix like in an MLP head
+    - spline is implemented as a piecewise-linear spline on a fixed grid
 
-    For stability and simplicity, each edge function is modeled as:
-        phi(x) = base_scale * SiLU(x) + spline_scale * spline(x)
-
-    where spline(x) is a learnable piecewise-linear spline on a fixed grid.
-    This is not a full pykan reproduction, but it is much closer to true KAN
-    than the previous Gaussian-basis + MLP head.
+    Note:
+        This is NOT a full official pykan reproduction.
+        Keep this for comparison as head_type="kan" or "kan_custom".
     """
 
     def __init__(
@@ -109,7 +116,9 @@ class KANLayer(nn.Module):
         x = x.clamp(self.grid_min, self.grid_max)
 
         # Normalize x into [0, grid_size - 1].
-        t = (x - self.grid_min) / (self.grid_max - self.grid_min) * (self.grid_size - 1)
+        t = (x - self.grid_min) / (self.grid_max - self.grid_min) * (
+            self.grid_size - 1
+        )
 
         # Left/right knot indices for linear interpolation.
         left_idx = torch.floor(t).long().clamp(0, self.grid_size - 2)
@@ -163,15 +172,16 @@ class KANLayer(nn.Module):
 
 class TrueKANHead(nn.Module):
     """
-    A practical KAN head for RSNA classification.
+    Old/custom KAN-inspired head for RSNA classification.
 
     Design:
     - input: feature vector from ResNet18 backbone
-    - KAN layer 1: in_features -> hidden_dim
-    - KAN layer 2: hidden_dim -> num_classes
+    - custom KAN-like layer 1: in_features -> hidden_dim
+    - custom KAN-like layer 2: hidden_dim -> num_classes
 
-    This preserves the idea that the classification head is a KAN,
-    while keeping the CNN backbone unchanged.
+    Use this with:
+        head_type="kan"
+        head_type="kan_custom"
     """
 
     def __init__(
@@ -217,6 +227,89 @@ class TrueKANHead(nn.Module):
         return logits
 
 
+class OfficialKANHead(nn.Module):
+    """
+    Official pykan-based KAN head.
+
+    This is the KAN head you should use when you want a standard KAN head.
+
+    Design:
+        input feature vector from ResNet18 backbone: [B, in_features]
+        official pykan KAN:
+            KAN(width=[in_features, hidden_dim, num_classes], grid=grid, k=k)
+        output logits: [B, num_classes]
+
+    Use this with:
+        head_type="kan_official"
+        head_type="official_kan"
+        head_type="pykan"
+
+    Requirement:
+        pip install pykan
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        num_classes: int,
+        hidden_dim: int = 16,
+        grid: int = 5,
+        k: int = 3,
+        seed: int = 42,
+        speed_mode: bool = True,
+    ):
+        super().__init__()
+
+        if PyKAN is None:
+            raise ImportError(
+                "OfficialKANHead requires pykan. Install it with: pip install pykan"
+            ) from _PYKAN_IMPORT_ERROR
+
+        self.in_features = in_features
+        self.num_classes = num_classes
+        self.hidden_dim = hidden_dim
+        self.grid = grid
+        self.k = k
+        self.seed = seed
+
+        self.kan = PyKAN(
+            width=[in_features, hidden_dim, num_classes],
+            grid=grid,
+            k=k,
+            seed=seed,
+        )
+
+        # Disable symbolic branch for faster normal PyTorch training.
+        # This is recommended when you only need numerical training.
+        if speed_mode and hasattr(self.kan, "speed"):
+            speed_result = self.kan.speed()
+            if speed_result is not None:
+                self.kan = speed_result
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        logits = self.kan(x)
+        return logits
+
+    @torch.no_grad()
+    def update_grid_from_samples(self, x: torch.Tensor):
+        """
+        Optional helper.
+
+        You can call this before training or during training if you want pykan
+        to adapt its spline grids to real CNN features.
+
+        Example:
+            features = model.backbone(images)
+            model.classifier.update_grid_from_samples(features)
+        """
+        if hasattr(self.kan, "update_grid_from_samples"):
+            return self.kan.update_grid_from_samples(x)
+
+        raise AttributeError(
+            "The installed pykan version does not have update_grid_from_samples()."
+        )
+
+
 class RSNAClassifier(nn.Module):
     def __init__(
         self,
@@ -225,10 +318,24 @@ class RSNAClassifier(nn.Module):
         head_type: str = "mlp",
         mlp_hidden_dim: int = 256,
         dropout: float = 0.2,
+
+        # Old/custom KAN head parameters.
+        # Used by head_type="kan" or "kan_custom".
         kan_hidden_dim: int = 64,
         kan_grid_size: int = 16,
         kan_grid_min: float = -2.0,
         kan_grid_max: float = 2.0,
+
+        # Official pykan KAN head parameters.
+        # Used by head_type="kan_official", "official_kan", or "pykan".
+        kan_official_hidden_dim: int = 16,
+        kan_official_grid: int = 5,
+        kan_official_k: int = 3,
+        kan_official_seed: int = 42,
+        kan_official_speed_mode: bool = True,
+
+        # Absorb unused legacy arguments safely, e.g. kan_num_basis from older files.
+        **unused_kwargs,
     ):
         super().__init__()
 
@@ -248,7 +355,9 @@ class RSNAClassifier(nn.Module):
                 backbone.conv1.weight.copy_(old_conv1.weight.mean(dim=1, keepdim=True))
         else:
             nn.init.kaiming_normal_(
-                backbone.conv1.weight, mode="fan_out", nonlinearity="relu"
+                backbone.conv1.weight,
+                mode="fan_out",
+                nonlinearity="relu",
             )
 
         in_features = backbone.fc.in_features
@@ -270,7 +379,7 @@ class RSNAClassifier(nn.Module):
                 dropout=dropout,
             )
 
-        elif head_type == "kan":
+        elif head_type in ["kan", "kan_custom", "custom_kan", "true_kan"]:
             self.classifier = TrueKANHead(
                 in_features=in_features,
                 num_classes=num_classes,
@@ -281,8 +390,23 @@ class RSNAClassifier(nn.Module):
                 dropout=dropout,
             )
 
+        elif head_type in ["kan_official", "official_kan", "pykan"]:
+            self.classifier = OfficialKANHead(
+                in_features=in_features,
+                num_classes=num_classes,
+                hidden_dim=kan_official_hidden_dim,
+                grid=kan_official_grid,
+                k=kan_official_k,
+                seed=kan_official_seed,
+                speed_mode=kan_official_speed_mode,
+            )
+
         else:
-            raise ValueError(f"Unsupported head_type: {head_type}")
+            raise ValueError(
+                f"Unsupported head_type: {head_type}. "
+                f"Choose from: 'linear', 'mlp', 'kan', 'kan_custom', "
+                f"'kan_official', 'official_kan', 'pykan'."
+            )
 
     def forward(self, x):
         feat = self.backbone(x)
