@@ -23,13 +23,11 @@ class BHXDetectionDataset(Dataset):
         image_size=512,
         window_center=40,
         window_width=80,
-        augment=False,
     ):
         self.csv_path = Path(csv_path)
         self.image_size = image_size
         self.window_center = window_center
         self.window_width = window_width
-        self.augment = augment
 
         if not self.csv_path.exists():
             raise FileNotFoundError(f"CSV file does not exist: {self.csv_path}")
@@ -57,48 +55,6 @@ class BHXDetectionDataset(Dataset):
     def __len__(self):
         return len(self.sop_uids)
 
-    def apply_train_augmentation(self, image, boxes):
-        """
-        Apply light augmentation for CT detection.
-
-        image:
-            Tensor [1, H, W], normalized to [0, 1]
-
-        boxes:
-            Tensor [N, 4], format x1, y1, x2, y2
-
-        Augmentations:
-            - random horizontal flip
-            - mild brightness/contrast jitter
-            - mild Gaussian noise
-        """
-        _, h, w = image.shape
-
-        # Random horizontal flip
-        if torch.rand(1).item() < 0.5:
-            image = torch.flip(image, dims=[2])
-
-            old_x1 = boxes[:, 0].clone()
-            old_x2 = boxes[:, 2].clone()
-
-            boxes[:, 0] = w - old_x2
-            boxes[:, 2] = w - old_x1
-
-        # Mild contrast and brightness jitter
-        if torch.rand(1).item() < 0.5:
-            contrast = 0.9 + 0.2 * torch.rand(1).item()       # [0.9, 1.1]
-            brightness = -0.05 + 0.10 * torch.rand(1).item()  # [-0.05, 0.05]
-
-            image = image * contrast + brightness
-            image = torch.clamp(image, 0.0, 1.0)
-
-        # Mild Gaussian noise
-        if torch.rand(1).item() < 0.3:
-            noise = torch.randn_like(image) * 0.01
-            image = torch.clamp(image + noise, 0.0, 1.0)
-
-        return image, boxes
-
     def __getitem__(self, idx):
         sop_uid = self.sop_uids[idx]
         rows = self.df[self.df["SOPInstanceUID"] == sop_uid]
@@ -113,7 +69,8 @@ class BHXDetectionDataset(Dataset):
 
         original_h, original_w = img.shape
 
-        # Keep image as 1-channel to match RSNA ResNet18-KAN backbone.
+        # Keep image as 1-channel to match the RSNA ResNet18-KAN backbone.
+        # img.copy() avoids the non-writable NumPy array warning.
         image = torch.from_numpy(img.copy()).float().unsqueeze(0)
 
         if self.image_size is not None:
@@ -146,7 +103,7 @@ class BHXDetectionDataset(Dataset):
             dtype=torch.int64,
         )
 
-        # Clip boxes to image boundary
+        # Clip boxes to image boundaries
         _, h, w = image.shape
 
         boxes[:, 0] = boxes[:, 0].clamp(min=0, max=w)
@@ -158,10 +115,6 @@ class BHXDetectionDataset(Dataset):
         valid = (boxes[:, 2] > boxes[:, 0]) & (boxes[:, 3] > boxes[:, 1])
         boxes = boxes[valid]
         labels = labels[valid]
-
-        # Apply augmentation only for training dataset
-        if self.augment:
-            image, boxes = self.apply_train_augmentation(image, boxes)
 
         area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
         iscrowd = torch.zeros((len(boxes),), dtype=torch.int64)

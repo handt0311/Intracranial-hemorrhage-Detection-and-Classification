@@ -46,7 +46,7 @@ OUTPUT_ROOT = STORAGE_ROOT / "output_bhx_detection"
 # Official Stage 2 run:
 # ResNet18 backbone transferred from KAN-based RSNA classifier
 # + Faster R-CNN detection head
-RUN_NAME = "resnet18_kan_to_fasterrcnn_bhx_full_ep100_map_coco"
+RUN_NAME = "resnet18_customKAN_to_fasterrcnn_bhx_full_ep100_map_coco"
 
 RUN_DIR = OUTPUT_ROOT / RUN_NAME
 
@@ -59,11 +59,7 @@ HISTORY_CSV_NAME = "history.csv"
 # =========================
 # Stage 1 RSNA classification checkpoint
 # =========================
-RSNA_BEST_MODEL_PATH = (
-    "/storage/student5/handt/outputforclassification/"
-    "kan_official/resnet18_kan_official_scratch_ep100/best_model.pth"
-)
-
+RSNA_BEST_MODEL_PATH = "/storage/student5/handt/outputforclassification/kan/resnet18_kan_scratch_ep100_20260423_152151/best_model.pth"
 
 # =========================
 # Classes
