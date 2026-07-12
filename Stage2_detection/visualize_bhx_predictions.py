@@ -11,7 +11,20 @@ from Stage2_detection.dataset_bhx import BHXDetectionDataset
 from Stage2_detection.model_resnet18_fasterrcnn import build_resnet18_fasterrcnn
 
 
-def draw_box(ax, box, label_text, edgecolor, linestyle="-", linewidth=2):
+CLASS_SHORT = {
+    "epidural": "EDH",
+    "intraparenchymal": "IPH",
+    "intraventricular": "IVH",
+    "subarachnoid": "SAH",
+    "subdural": "SDH",
+}
+
+
+def short_class_name(cls_name):
+    return CLASS_SHORT.get(cls_name.lower(), cls_name)
+
+
+def draw_box(ax, box, label_text, edgecolor, linestyle="-", linewidth=3):
     x1, y1, x2, y2 = [float(v) for v in box]
     w = x2 - x1
     h = y2 - y1
@@ -29,11 +42,17 @@ def draw_box(ax, box, label_text, edgecolor, linestyle="-", linewidth=2):
 
     ax.text(
         x1,
-        max(y1 - 4, 0),
+        max(y1 - 8, 0),
         label_text,
-        fontsize=8,
+        fontsize=14,
+        fontweight="bold",
         color="white",
-        bbox=dict(facecolor=edgecolor, alpha=0.75, pad=1),
+        bbox=dict(
+            facecolor=edgecolor,
+            alpha=0.85,
+            pad=2,
+            edgecolor="none",
+        ),
     )
 
 
@@ -87,44 +106,47 @@ def visualize_one_sample(
 
     sop_uid = dataset.sop_uids[idx]
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(10, 10))
     ax.imshow(img_np, cmap="gray", vmin=0, vmax=1)
     ax.axis("off")
 
     ax.set_title(
         f"BHX validation sample {idx}\n"
-        f"GT: solid green | Prediction: dashed red | score >= {score_thresh}",
-        fontsize=10,
+        f"GT: green | Prediction: red | score >= {score_thresh}",
+        fontsize=16,
+        fontweight="bold",
     )
 
-    # Ground-truth boxes
     for box, label in zip(gt_boxes, gt_labels):
         cls_id = int(label.item())
         cls_name = cfg.ID_TO_CLASS.get(cls_id, str(cls_id))
+        cls_name = short_class_name(cls_name)
+
         draw_box(
             ax=ax,
             box=box,
             label_text=f"GT: {cls_name}",
             edgecolor="lime",
             linestyle="-",
-            linewidth=2,
+            linewidth=3,
         )
 
-    # Predicted boxes
     for box, label, score in zip(pred_boxes, pred_labels, pred_scores):
         cls_id = int(label.item())
         cls_name = cfg.ID_TO_CLASS.get(cls_id, str(cls_id))
+        cls_name = short_class_name(cls_name)
+
         draw_box(
             ax=ax,
             box=box,
             label_text=f"Pred: {cls_name} {float(score):.2f}",
             edgecolor="red",
             linestyle="--",
-            linewidth=2,
+            linewidth=3,
         )
 
     output_path = output_dir / f"val_{idx:05d}_pred.png"
-    fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     return {
